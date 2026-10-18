@@ -105,6 +105,20 @@ rea --help
 
 Để phân tích mã máy, trước tiên hãy cấu hình trình phân tích. Xem [hướng dẫn CLI và Evidence](../cli.md) về các lệnh phân tích mã máy, lựa chọn trình phân tích, ảnh chụp trạng thái và sử dụng trong script.
 
+### Cài đặt từ mã nguồn
+
+Nếu bạn không cài đặt từ npm registry, hãy build bản checkout của kho mã và chạy trực tiếp. Setup chạy từ một bản checkout sẽ đăng ký điểm vào của bản checkout đó với agent của bạn, vì vậy hãy giữ nó ở một đường dẫn ổn định:
+
+```bash
+git clone https://github.com/morluto/rea.git
+cd rea
+npm ci
+npm run build
+node scripts/rea.mjs setup --client codex --dry-run
+```
+
+Xem lại kế hoạch, chạy lại không có `--dry-run` và khởi động lại agent. Dùng `node scripts/rea.mjs <lệnh>` cho các lệnh CLI, hoặc `npm link` để có lệnh `rea` trong shell. Thay URL clone bằng fork của bạn. Hướng dẫn đầy đủ nằm trong `docs/installation.md`, mục "Install from a local source checkout".
+
 ### Cập nhật REA
 
 REA thay đổi nhanh và các bản phát hành mới thường xuyên có bản sửa lỗi. Hãy giữ bản cài đặt của bạn được cập nhật.

@@ -105,6 +105,20 @@ rea --help
 
 Yerel makine kodu analizi için önce bir sağlayıcı yapılandırın. Yerel analiz komutları, sağlayıcı seçimi, anlık görüntüler ve betik kullanımı için [CLI ve Evidence rehberine](../cli.md) bakın.
 
+### Kaynaktan kurun
+
+npm kayıt deposundan kurmuyorsanız, depo çalışma kopyasını derleyin ve doğrudan çalıştırın. Bir çalışma kopyasından çalıştırılan setup, o kopyanın giriş noktasını ajanınıza kaydeder; bu yüzden kopyayı sabit bir yolda tutun:
+
+```bash
+git clone https://github.com/morluto/rea.git
+cd rea
+npm ci
+npm run build
+node scripts/rea.mjs setup --client codex --dry-run
+```
+
+Planı inceleyin, `--dry-run` olmadan yeniden çalıştırın ve ajanınızı yeniden başlatın. CLI komutları için `node scripts/rea.mjs <komut>`, kabukta görünen bir `rea` için `npm link` kullanın. Klon URL'sini kendi çatallamanızla değiştirin. Tam yol, `docs/installation.md` içindeki "Install from a local source checkout" bölümündedir.
+
 ### REA'yı güncelleyin
 
 REA hızla değişir ve yeni sürümler sık sık hata düzeltmeleri içerir. Kurulumunuzu güncel tutun.

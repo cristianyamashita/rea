@@ -102,6 +102,7 @@ const SOURCE_PATHS = {
   applicationContracts: "dist/contracts/applicationToolContracts.js",
   analysisViewContracts: "dist/contracts/analysisViewToolContracts.js",
   webScriptContracts: "dist/contracts/webScriptToolContracts.js",
+  specificationContracts: "dist/contracts/specificationToolContracts.js",
   javascriptRecoveryContracts:
     "dist/contracts/javascript/javascriptRecoveryToolContracts.js",
   javascriptRecoveryProvider: "dist/javascript/recovery/WakaruRelease.js",

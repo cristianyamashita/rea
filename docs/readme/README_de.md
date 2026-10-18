@@ -105,6 +105,20 @@ rea --help
 
 Konfiguriere für native Analysen zuerst einen Provider. Native Befehle, Provider-Auswahl, Snapshots und Skriptnutzung beschreibt der [CLI- und Evidence-Leitfaden](../cli.md).
 
+### Aus dem Quellcode installieren
+
+Wenn Sie nicht aus der npm-Registry installieren, bauen Sie den Repository-Checkout und führen ihn direkt aus. Ein aus dem Checkout gestartetes Setup registriert den Einstiegspunkt dieses Checkouts bei Ihrem Agenten; halten Sie ihn daher unter einem stabilen Pfad:
+
+```bash
+git clone https://github.com/morluto/rea.git
+cd rea
+npm ci
+npm run build
+node scripts/rea.mjs setup --client codex --dry-run
+```
+
+Prüfen Sie den Plan, führen Sie den Befehl ohne `--dry-run` erneut aus und starten Sie Ihren Agenten neu. Verwenden Sie `node scripts/rea.mjs <Befehl>` für CLI-Befehle oder `npm link` für ein in der Shell sichtbares `rea`. Ersetzen Sie die Clone-URL durch Ihren Fork. Der vollständige Weg steht in `docs/installation.md` unter "Install from a local source checkout".
+
 ### REA aktualisieren
 
 REA entwickelt sich schnell weiter; neue Versionen enthalten häufig Fehlerbehebungen. Halte deine Installation aktuell.

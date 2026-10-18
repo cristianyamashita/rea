@@ -105,6 +105,20 @@ rea --help
 
 ネイティブ分析には、先にプロバイダーの設定が必要です。ネイティブ分析のコマンド、プロバイダーの選択、スナップショット、スクリプトでの利用は、[CLI と Evidence のガイド](../cli.md)を参照してください。
 
+### ソースからインストールする
+
+npm レジストリからインストールしない場合は、リポジトリのチェックアウトをビルドして直接実行します。チェックアウトから実行した setup は、そのチェックアウトのエントリーポイントをエージェントに登録するため、安定したパスに置いてください:
+
+```bash
+git clone https://github.com/morluto/rea.git
+cd rea
+npm ci
+npm run build
+node scripts/rea.mjs setup --client codex --dry-run
+```
+
+計画を確認し、`--dry-run` なしで再実行してから、エージェントを再起動します。CLI コマンドには `node scripts/rea.mjs <command>` を、シェルから見える `rea` には `npm link` を使います。クローン URL は自分のフォークに置き換えてください。完全な手順は `docs/installation.md` の "Install from a local source checkout" にあります。
+
 ### REA を更新する
 
 REA は更新が速く、新しいリリースには頻繁にバグ修正が含まれます。インストールしたバージョンを最新に保ってください。

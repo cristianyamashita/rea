@@ -105,6 +105,20 @@ rea --help
 
 原生分析需要先設定分析提供者。原生命令、提供者選擇、快照和腳本用法見 [CLI 與 Evidence 指南](../cli.md)。
 
+### 從原始碼安裝
+
+如果不透過 npm 登錄檔安裝，請建置儲存庫檢出並直接執行。從檢出執行的 setup 會把該檢出的進入點註冊到你的代理，因此請將其放在穩定的路徑：
+
+```bash
+git clone https://github.com/morluto/rea.git
+cd rea
+npm ci
+npm run build
+node scripts/rea.mjs setup --client codex --dry-run
+```
+
+檢視計畫，去掉 `--dry-run` 重新執行，然後重新啟動代理。CLI 命令使用 `node scripts/rea.mjs <command>`，或用 `npm link` 取得 shell 可見的 `rea`。將複製網址替換為你的 fork。完整步驟見 `docs/installation.md` 的 "Install from a local source checkout"。
+
 ### 更新 REA
 
 REA 更新較快，新版本經常包含錯誤修復。請將安裝的版本保持最新。

@@ -107,6 +107,20 @@ rea --help
 
 네이티브 분석에는 먼저 제공자를 설정해야 합니다. 네이티브 명령, 제공자 선택, 스냅샷, 스크립트 사용은 [CLI 및 Evidence 가이드](../cli.md)를 참고하세요.
 
+### 소스에서 설치
+
+npm 레지스트리에서 설치하지 않는 경우, 저장소 체크아웃을 빌드하고 직접 실행하세요. 체크아웃에서 실행한 setup은 해당 체크아웃의 진입점을 에이전트에 등록하므로 안정적인 경로에 두세요:
+
+```bash
+git clone https://github.com/morluto/rea.git
+cd rea
+npm ci
+npm run build
+node scripts/rea.mjs setup --client codex --dry-run
+```
+
+계획을 검토하고 `--dry-run` 없이 다시 실행한 뒤 에이전트를 재시작하세요. CLI 명령에는 `node scripts/rea.mjs <command>`를, 셸에서 보이는 `rea`에는 `npm link`를 사용하세요. 클론 URL은 자신의 포크로 바꾸세요. 전체 절차는 `docs/installation.md`의 "Install from a local source checkout"에 있습니다.
+
 ### REA 업데이트
 
 REA는 빠르게 바뀌며 새 릴리스에는 버그 수정이 자주 포함됩니다. 설치된 버전을 최신으로 유지하세요.

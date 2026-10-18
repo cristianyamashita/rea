@@ -121,6 +121,26 @@ For native analysis, configure a provider first. See the
 [CLI and Evidence guide](docs/cli.md) for native commands, provider selection,
 snapshots and scripting.
 
+### Install from source
+
+If you do not install from the npm registry, build the repository checkout and
+run it directly. Setup run from a checkout registers that checkout's entry
+point with your agent, so keep it at a stable path:
+
+```bash
+git clone https://github.com/morluto/rea.git
+cd rea
+npm ci
+npm run build
+node scripts/rea.mjs setup --client codex --dry-run
+```
+
+Review the plan, rerun without `--dry-run`, and restart your agent. Use
+`node scripts/rea.mjs <command>` for CLI commands, or `npm link` for a
+shell-visible `rea`. Replace the clone URL with your fork. The complete route,
+including updates, Windows limits and manual registration, is in
+`docs/installation.md` under "Install from a local source checkout".
+
 ### Update REA
 
 REA changes quickly, and new releases include frequent bug fixes. Keep your

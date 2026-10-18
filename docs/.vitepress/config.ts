@@ -71,6 +71,19 @@ export default defineConfig({
         ],
       },
       {
+        text: "Português (Brasil)",
+        collapsed: true,
+        items: [
+          { text: "Manuais em português", link: "/pt-BR/" },
+          { text: "Instalação e configuração", link: "/pt-BR/installation" },
+          { text: "CLI e Evidence", link: "/pt-BR/cli" },
+          {
+            text: "Exportação de especificação",
+            link: "/pt-BR/specification-export",
+          },
+        ],
+      },
+      {
         text: "Reference and development",
         collapsed: true,
         items: [

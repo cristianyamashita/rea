@@ -9,6 +9,7 @@ Setup previews configuration changes and asks for approval before applying them.
 | Diagnose one task                 | [Scoped readiness checks](#check-readiness-for-your-task)                                           |
 | Configure an analysis engine      | [Hopper](#hopper), [Ghidra](#ghidra), the [IDA guide](ida-provider.md), or [Kuna](kuna-provider.md) |
 | Update or remove REA              | [Maintenance](#diagnose-update-and-remove)                                                          |
+| Install without the npm registry  | [Local source checkout](#install-from-a-local-source-checkout)                                      |
 | Resolve a client-specific problem | [Client configuration](client-configuration.md)                                                     |
 
 ## Start setup
@@ -436,6 +437,126 @@ Use the connected server's actual tool list and advertised input schemas for
 feature selection. The same package version string in a development checkout
 does not establish that its bytes match the npm tarball. Update a registration
 through a reviewed, scoped setup plan, then restart/reconnect the agent.
+
+## Install from a local source checkout
+
+Use this route when REA is not installed from the npm registry: a fork, a
+pinned commit, a review of unreleased changes, or a host without registry
+access for REA itself. A checkout must be built before any CLI or MCP command
+works; `npm ci` alone only installs dependencies.
+
+Prerequisites are Git, a supported Node.js (the version in `.nvmrc`, or any
+release in the range listed under
+[package runners](#package-runners-and-global-installation)) with its paired
+npm, and on Linux the procps-compatible `ps` described in
+[Linux owned-process prerequisite](#linux-owned-process-prerequisite).
+Analysis engines remain bring-your-own, exactly as for a registry installation.
+
+```bash
+git clone https://github.com/morluto/rea.git
+cd rea
+nvm use            # optional: selects the pinned toolchain from .nvmrc
+npm ci
+npm run build
+node scripts/rea.mjs --help
+```
+
+Replace the clone URL with your fork. `npm ci` downloads the locked
+dependencies; `npm run build` compiles the runtime, records the catalog
+digests and bundles the authored skill into the ignored `skills/` directory.
+If you change `package.json`, the lockfile or the skill version, run
+`npm run metadata:generate` before building. The checkout's `rea --version`
+can match a published release without its bytes matching the npm tarball; use
+the connected server's actual tool list for feature selection.
+
+### Run commands from the checkout
+
+`scripts/rea.mjs` is the same dispatcher the published package installs as
+`rea`. Run it from any working directory:
+
+```bash
+node /absolute/path/to/rea/scripts/rea.mjs analyze-javascript-application /absolute/path/to/app --json
+node /absolute/path/to/rea/scripts/rea.mjs doctor --json
+```
+
+Wherever this documentation writes `rea` or `npx -y rea-agents@latest`,
+substitute `node /absolute/path/to/rea/scripts/rea.mjs`. For a shell-visible
+`rea` command that follows the checkout as you rebuild it, link the checkout
+into your npm global prefix:
+
+```bash
+npm link
+rea --help
+```
+
+`npm link` creates a global symlink to the checkout rather than a copy, so a
+later `npm run build` is picked up without reinstalling. `npm install --global .`
+instead installs a snapshot of the current build into the global prefix, like
+the published package, and must be repeated after each rebuild.
+
+### Register the checkout with an agent
+
+Setup run directly from the checkout, not through `npx` or `bunx`, registers
+the direct entry point `node /absolute/path/to/rea/scripts/rea.mjs mcp` and
+installs the skill bundled by `npm run build`:
+
+```bash
+node scripts/rea.mjs setup --client codex --dry-run
+node scripts/rea.mjs setup --client codex
+```
+
+Review the planned paths and changes before approving, then restart the agent.
+Setup through a linked global `rea` registers the same direct entry point. The
+registration names the checkout's absolute path, so moving, deleting or
+replacing the checkout breaks the agent's REA server until setup is rerun from
+the new location. Do not register a path inside npm's temporary package cache.
+
+For a client that requires manual configuration, the equivalent stdio entry is:
+
+```json
+{
+  "mcpServers": {
+    "rea": {
+      "command": "node",
+      "args": ["/absolute/path/to/rea/scripts/rea.mjs", "mcp"]
+    }
+  }
+}
+```
+
+On Windows, use the full path to `node.exe` as the command and a Windows path
+for the dispatcher; no `cmd.exe` wrapper is needed because `node` is a real
+executable.
+
+### Update a source installation
+
+`rea update` only updates an npm or Bun global installation that owns the
+running package. For a checkout it stops with an instruction to update through
+the mechanism that owns the installation. Update with Git and rebuild:
+
+```bash
+git pull
+npm ci
+npm run build
+```
+
+A linked `rea` and every registered direct entry point now run the new build.
+After `npm install --global .`, repeat that command. Rerun the scoped setup
+command when the update changed the bundled skill, so the installed skill copy
+matches, and restart the affected agents. `rea doctor --skill --json` reports
+whether the installed skill matches the checkout's bundle.
+
+### Source checkout limits
+
+- A source checkout has no Windows native addon. On Windows, the controls that
+  need it are unavailable until you build the artifact as described in the
+  [contributing guide](https://github.com/morluto/rea/blob/main/CONTRIBUTING.md#windows-source-checkouts);
+  the artifact build itself runs on Linux.
+- The bundled skill's own recovery instructions name `npx -y rea-agents@latest`.
+  Those commands download the published package, not your checkout; substitute
+  the dispatcher path above when repairing a source installation.
+- The curl installer, `rea update` and the MCP Registry entry all describe the
+  published npm package and do not apply to a checkout.
 
 ## Skill-only installation
 

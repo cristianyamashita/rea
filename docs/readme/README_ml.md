@@ -109,6 +109,20 @@ rea --help
 
 Native analysis നടത്തുന്നതിന് മുമ്പ് ഒരു provider ക്രമീകരിക്കുക. Native commands, provider തിരഞ്ഞെടുക്കൽ, snapshots, scripting എന്നിവയ്ക്കായി [CLI and Evidence guide](../cli.md) കാണുക.
 
+### സോഴ്‌സിൽ നിന്ന് ഇൻസ്റ്റാൾ ചെയ്യുക
+
+npm രജിസ്ട്രിയിൽ നിന്ന് ഇൻസ്റ്റാൾ ചെയ്യുന്നില്ലെങ്കിൽ, റിപ്പോസിറ്ററിയുടെ ചെക്കൗട്ട് ബിൽഡ് ചെയ്ത് നേരിട്ട് റൺ ചെയ്യുക. ഒരു ചെക്കൗട്ടിൽ നിന്ന് റൺ ചെയ്യുന്ന setup ആ ചെക്കൗട്ടിന്റെ എൻട്രി പോയിന്റ് നിങ്ങളുടെ ഏജന്റിൽ രജിസ്റ്റർ ചെയ്യുന്നതിനാൽ, അത് സ്ഥിരമായ ഒരു പാതയിൽ സൂക്ഷിക്കുക:
+
+```bash
+git clone https://github.com/morluto/rea.git
+cd rea
+npm ci
+npm run build
+node scripts/rea.mjs setup --client codex --dry-run
+```
+
+പ്ലാൻ പരിശോധിച്ച്, `--dry-run` ഇല്ലാതെ വീണ്ടും റൺ ചെയ്ത്, ഏജന്റ് റീസ്റ്റാർട്ട് ചെയ്യുക. CLI കമാൻഡുകൾക്ക് `node scripts/rea.mjs <command>` ഉം, ഷെല്ലിൽ കാണാവുന്ന `rea` യ്ക്ക് `npm link` ഉം ഉപയോഗിക്കുക. ക്ലോൺ URL നിങ്ങളുടെ ഫോർക്കിന്റേതാക്കി മാറ്റുക. പൂർണ്ണമായ നടപടിക്രമം `docs/installation.md` ലെ "Install from a local source checkout" എന്ന ഭാഗത്തുണ്ട്.
+
 ### REA അപ്‌ഡേറ്റ് ചെയ്യുക
 
 REA-യിൽ പതിവായി മാറ്റങ്ങൾ വരുന്നു; പുതിയ releases-ൽ പല bug fixes-ഉം ഉൾപ്പെടുന്നു. നിങ്ങളുടെ installation ഏറ്റവും പുതിയ പതിപ്പിലേക്ക് അപ്‌ഡേറ്റ് ചെയ്യുക.

@@ -105,6 +105,20 @@ rea --help
 
 Untuk analisis native, konfigurasikan penyedia terlebih dahulu. Lihat [Panduan CLI dan Bukti](../cli.md) untuk perintah native, pemilihan penyedia, snapshot, dan pembuatan skrip.
 
+### Instal dari kode sumber
+
+Jika Anda tidak menginstal dari registri npm, bangun checkout repositori dan jalankan langsung. Setup yang dijalankan dari sebuah checkout mendaftarkan titik masuk checkout itu ke agen Anda, jadi simpanlah di jalur yang stabil:
+
+```bash
+git clone https://github.com/morluto/rea.git
+cd rea
+npm ci
+npm run build
+node scripts/rea.mjs setup --client codex --dry-run
+```
+
+Tinjau rencananya, jalankan ulang tanpa `--dry-run`, lalu mulai ulang agen Anda. Gunakan `node scripts/rea.mjs <perintah>` untuk perintah CLI, atau `npm link` untuk `rea` yang terlihat di shell. Ganti URL klon dengan fork Anda. Langkah lengkapnya ada di `docs/installation.md` pada bagian "Install from a local source checkout".
+
 ### Perbarui REA
 
 REA berkembang dengan cepat, dan rilis baru sering menyertakan perbaikan bug. Pastikan instalasi Anda selalu diperbarui.
