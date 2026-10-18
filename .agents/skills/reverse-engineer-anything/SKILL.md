@@ -1,8 +1,8 @@
 ---
 name: reverse-engineer-anything
-description: Reverse engineer native, managed, Electron/JavaScript, packaged, firmware, and browser targets with REA. Use shipped-artifact or requested runtime evidence to explain features, compare versions, decompile code, or guide a reconstruction. Skip REA for ordinary source-repository architecture analysis.
+description: Reverse engineer native, managed, Electron/JavaScript, packaged, firmware, and browser targets with REA. Use shipped-artifact or requested runtime evidence to explain features, compare versions, decompile code, write a reusable specification, or guide a reconstruction. Skip REA for ordinary source-repository architecture analysis.
 metadata:
-  version: "42"
+  version: "43"
 ---
 
 # REA
@@ -333,6 +333,33 @@ answered, partially answered, or unresolved based on its evidence; keep
 bounded negative searches bounded, and do not describe a broad investigation
 as complete while required questions remain open.
 
+## Write a specification
+
+When the user wants a specification of how the target works, to reuse its
+behavior or features elsewhere rather than rebuild it, produce an indexed
+Markdown tree with `export_specification` instead of one long report:
+
+1. Survey first, then list the areas (features, subsystems, resources) the
+   specification must cover and the Evidence each needs.
+2. Investigate one area at a time following the staged workflow above. Record
+   each material open question with `record_unknown`.
+3. Keep a findings ledger: one entry per conclusion with a stable `id`, a
+   `title`, a Markdown `statement`, its `kind` (`observed`, `derived`,
+   `inferred` or `unknown`), its `area` (the Evidence operation) and the
+   `evidence_ids` / `unknown_ids` it rests on. Never write a statement that no
+   cited record supports; lower the kind or record an unknown instead.
+4. Export the session with `export_evidence_bundle` to an absolute path, then
+   call `export_specification` with that bundle path, a new absolute
+   `output_directory` and the ledger. The CLI fallback is
+   `rea export-specification '<json>' --json`.
+5. Read the returned counts and the tree's `README.md`; follow one path from an
+   area index to a fact page to confirm it answers the requested focus. A
+   rejected finding names the offending `findings[i]` path; fix the ledger.
+
+Tell the reader to start at `README.md`. Fact pages are deterministic renderings
+of Evidence; findings are the analyst's. See
+[specification export](references/evidence-workflows.md#specification-export).
+
 ## Read only the relevant guide
 
 - Native binaries, managed assemblies, archives, and extraction:
@@ -344,7 +371,8 @@ as complete while required questions remain open.
 - Browser/Electron observation (passive and scenario) and static/runtime
   reconciliation:
   [references/runtime-observation.md](references/runtime-observation.md)
-- Evidence paging, comparisons, residual unknowns, and verification:
+- Evidence paging, comparisons, residual unknowns, verification, and
+  specification export:
   [references/evidence-workflows.md](references/evidence-workflows.md)
 
 ## Finish the task

@@ -232,6 +232,17 @@ const pathRequests: readonly [string, Record<string, unknown>][] = [
     { capture_path: "/tmp/capture.json", output_directory: nul },
   ],
   [
+    "export_specification",
+    { evidence_bundle: { path: nul }, output_directory: "/tmp/specification" },
+  ],
+  [
+    "export_specification",
+    {
+      evidence_bundle: { path: "/tmp/evidence/bundle.json" },
+      output_directory: nul,
+    },
+  ],
+  [
     "trace_web_source_location",
     {
       manifest_path: nul,

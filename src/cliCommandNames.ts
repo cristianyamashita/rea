@@ -129,6 +129,7 @@ export const CLI_COMMANDS = Object.freeze({
   inspectWebPage: "inspect-web-page",
   analyzeWebBundle: "analyze-web-bundle",
   exportWebScripts: "export-web-scripts",
+  exportSpecification: "export-specification",
   recoverJavaScriptSources: "recover-javascript-sources",
   observeWebSession: "observe-web-session",
   discoverWebMcpTools: "discover-webmcp-tools",

@@ -84,6 +84,13 @@ export const WEB_SCRIPT_EXPORT_PROVIDER = {
   version: "1",
 } as const;
 
+/** Provider identity for deterministic specification trees rendered from Evidence bundles. */
+export const SPECIFICATION_EXPORT_PROVIDER = {
+  id: "rea-specification-export",
+  name: "REA specification export",
+  version: "1",
+} as const;
+
 /** Provider identity for deterministic static JavaScript application analysis. */
 export const JAVASCRIPT_APPLICATION_PROVIDER = {
   id: "rea-javascript-application",

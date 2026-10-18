@@ -66,6 +66,7 @@ import { registerNativeTools } from "./registerNativeTools.js";
 import { registerBrowserScenarioTool } from "./registerBrowserScenarioTool.js";
 import { registerBrowserTools } from "./registerBrowserTools.js";
 import { registerWebScriptTool } from "./registerWebScriptTool.js";
+import { registerSpecificationExportTool } from "./registerSpecificationExportTool.js";
 import { registerWebModuleTool } from "./registerWebModuleTool.js";
 import type { WebModuleTraceService } from "../application/WebModuleTraceService.js";
 import { createWebModuleTraceService } from "../composition/webModules.js";
@@ -902,6 +903,7 @@ const registerObservationTools = ({
 }: ServerToolContext): void => {
   const common = { logger, recordEvidence, withAdmittedAnalysis };
   registerWebScriptTool(server, { ...common, artifactResources });
+  registerSpecificationExportTool(server, { ...common, artifactResources });
   registerBrowserTools(server, {
     ...common,
     browser: options.browserObservation,

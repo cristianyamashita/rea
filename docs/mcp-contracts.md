@@ -802,7 +802,7 @@ JSON Schema:
   objects or arrays.
 - The few schemas whose validation structure alone exceeds the budget
   (`compare_web_captures`, `build_reconstruction_obligation_ledger`,
-  `evaluate_reconstruction_coverage`,
+  `evaluate_reconstruction_coverage`, `export_specification`,
   `compare_application_versions`, `capture_browser_scenario`) are advertised
   in a reduced form: property names, reference-resolved types (including union
   alternatives), first-level guidance, and the root's required-field constraints,

@@ -3,10 +3,10 @@ import { join } from "node:path";
 import { Readable } from "node:stream";
 
 import { ArtifactReaderFailure } from "../../artifacts/ArtifactReader.js";
-import { ArtifactResourceScope } from "../../artifacts/ArtifactResourceScope.js";
+import type { ArtifactResourceScope } from "../../artifacts/ArtifactResourceScope.js";
 import { DESTINATION_CASE_COLLISION_PREFIX } from "../../artifacts/ArtifactPaths.js";
-import { SafeOutputTree } from "../../artifacts/SafeOutputTree.js";
-import { SafeOutputTreeCreationFailure } from "../../artifacts/SafeOutputTreeCreationFailure.js";
+import { publishOutputTree } from "../../artifacts/OutputTreePublication.js";
+import type { SafeOutputTree } from "../../artifacts/SafeOutputTree.js";
 import { PLAYWRIGHT_RESPONSE_BODY_PROVENANCE_LIMITATION } from "../../domain/browserNetworkEvidence.js";
 import {
   webScriptExportManifestSchema,
@@ -36,116 +36,106 @@ interface PublishWebScriptsOptions {
 }
 
 /** Exclusively publish verified bytes and a manifest, rolling back partial work. */
-export const publishWebScripts = async (
+export const publishWebScripts = (
   input: ExportWebScriptsInput,
   capture: SelectedScriptCapture & { readonly sourceEvidenceId: string | null },
   captureSha256: string,
   options: PublishWebScriptsOptions,
 ): Promise<WebScriptExportResult> =>
-  options.resources.run(async () => {
-    const planned = planWebScriptExport(capture.scripts);
-    const scenarioResponseBodyCaptured =
-      capture.kind === "browser-scenario" &&
-      capture.scripts.some(
-        (script) =>
-          script.source.kind === "scenario-response" &&
-          script.content.state === "captured" &&
-          (script.content.representation === "playwright-response-body-bytes" ||
-            script.content.representation === "browser-decoded-response-bytes"),
-      );
-    const responseBodyProvenanceLimitations =
-      scenarioResponseBodyCaptured &&
-      !capture.limitations.includes(
-        PLAYWRIGHT_RESPONSE_BODY_PROVENANCE_LIMITATION,
-      )
-        ? [PLAYWRIGHT_RESPONSE_BODY_PROVENANCE_LIMITATION]
-        : [];
-    let tree: SafeOutputTree | undefined;
-    let result: WebScriptExportResult | undefined;
-    try {
-      tree = await SafeOutputTree.create(input.output_directory);
-      options.signal?.throwIfAborted();
-      const records: ExportedWebScript[] = [];
-      for (const [index, item] of planned.entries()) {
-        options.signal?.throwIfAborted();
-        records.push(
-          await publishPlannedScript(tree, item, index, options.signal),
-        );
-      }
-      const manifest = webScriptExportManifestSchema.parse({
-        capture_path: input.capture_path,
-        capture_sha256: captureSha256,
-        capture_kind: capture.kind,
-        source_evidence_id: capture.sourceEvidenceId,
-        capture_completeness: capture.completeness,
-        output_directory: tree.outputRoot,
-        analysis_input: records.some(
-          ({ content }) => content.state === "exported",
-        )
-          ? { input_path: join(tree.outputRoot, "files"), format: "directory" }
-          : null,
-        scripts: records,
-        limitations: [
-          ...capture.limitations,
-          ...responseBodyProvenanceLimitations,
-          ...LIMITATIONS,
-          ...(records.some(({ content }) => content.state === "exported")
-            ? []
-            : [
-                "No script bytes were exportable. Include script sources in inspect_web_page or select response_body in capture_browser_scenario, then capture again.",
-              ]),
-        ],
+  publishOutputTree<WebScriptExportResult>({
+    outputDirectory: input.output_directory,
+    resources: options.resources,
+    signal: options.signal,
+    write: (tree) =>
+      writeWebScripts(tree, { input, capture, captureSha256 }, options.signal),
+    cleanupFailure: ({ reason, outputRoot, diagnostic, published }) => {
+      const error = new WebScriptExportError(reason, outputRoot, diagnostic, {
+        residualPaths: [outputRoot],
       });
-      const bytes = Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`);
-      const digest = createHash("sha256").update(bytes).digest("hex");
-      result = webScriptExportResultSchema.parse({
-        ...manifest,
-        manifest: {
-          path: join(tree.outputRoot, "manifest.json"),
-          sha256: digest,
-          bytes: bytes.length,
-        },
-      });
-      await tree.write(
-        "manifest.json",
-        Readable.from([bytes]),
-        { sha256: digest, bytes: bytes.byteLength },
-        options.signal,
-      );
-      options.signal?.throwIfAborted();
-      await tree.commit(options.signal);
-      return result;
-    } catch (cause: unknown) {
-      if (cause instanceof SafeOutputTreeCreationFailure) tree = cause.tree;
-      if (tree !== undefined) {
-        const cleanup = await options.resources.release({
-          kind: "output-tree",
-          resource: tree.outputRoot,
-          tree,
+      if (published !== undefined)
+        error.retainPartialObservation({
+          kind: "web-script-export",
+          result: published,
         });
-        if (cleanup.kind === "failed") {
-          const cleanupCause = cleanup.cause;
-          const diagnostic = tree.published
-            ? `Publication completed, but descriptor cleanup failed (${message(cleanupCause)}). The published output remains available.`
-            : `Publication failed (${message(cause)}); rollback failed (${message(cleanupCause)}). Remove the residual output directory before retrying.`;
-          const error = new WebScriptExportError(
-            cause instanceof ArtifactReaderFailure ? cause.reason : "io",
-            tree.outputRoot,
-            diagnostic,
-            { residualPaths: [tree.outputRoot] },
-          );
-          if (tree.published && result !== undefined)
-            error.retainPartialObservation({
-              kind: "web-script-export",
-              result,
-            });
-          throw error;
-        }
-        if (tree.published && result !== undefined) return result;
-      }
-      throw cause;
-    }
+      return error;
+    },
   });
+
+interface WebScriptPublication {
+  readonly input: ExportWebScriptsInput;
+  readonly capture: SelectedScriptCapture & {
+    readonly sourceEvidenceId: string | null;
+  };
+  readonly captureSha256: string;
+}
+
+const writeWebScripts = async (
+  tree: SafeOutputTree,
+  { input, capture, captureSha256 }: WebScriptPublication,
+  signal: AbortSignal | undefined,
+): Promise<WebScriptExportResult> => {
+  const planned = planWebScriptExport(capture.scripts);
+  const scenarioResponseBodyCaptured =
+    capture.kind === "browser-scenario" &&
+    capture.scripts.some(
+      (script) =>
+        script.source.kind === "scenario-response" &&
+        script.content.state === "captured" &&
+        (script.content.representation === "playwright-response-body-bytes" ||
+          script.content.representation === "browser-decoded-response-bytes"),
+    );
+  const responseBodyProvenanceLimitations =
+    scenarioResponseBodyCaptured &&
+    !capture.limitations.includes(
+      PLAYWRIGHT_RESPONSE_BODY_PROVENANCE_LIMITATION,
+    )
+      ? [PLAYWRIGHT_RESPONSE_BODY_PROVENANCE_LIMITATION]
+      : [];
+  const records: ExportedWebScript[] = [];
+  for (const [index, item] of planned.entries()) {
+    signal?.throwIfAborted();
+    records.push(await publishPlannedScript(tree, item, index, signal));
+  }
+  const manifest = webScriptExportManifestSchema.parse({
+    capture_path: input.capture_path,
+    capture_sha256: captureSha256,
+    capture_kind: capture.kind,
+    source_evidence_id: capture.sourceEvidenceId,
+    capture_completeness: capture.completeness,
+    output_directory: tree.outputRoot,
+    analysis_input: records.some(({ content }) => content.state === "exported")
+      ? { input_path: join(tree.outputRoot, "files"), format: "directory" }
+      : null,
+    scripts: records,
+    limitations: [
+      ...capture.limitations,
+      ...responseBodyProvenanceLimitations,
+      ...LIMITATIONS,
+      ...(records.some(({ content }) => content.state === "exported")
+        ? []
+        : [
+            "No script bytes were exportable. Include script sources in inspect_web_page or select response_body in capture_browser_scenario, then capture again.",
+          ]),
+    ],
+  });
+  const bytes = Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`);
+  const digest = createHash("sha256").update(bytes).digest("hex");
+  const result = webScriptExportResultSchema.parse({
+    ...manifest,
+    manifest: {
+      path: join(tree.outputRoot, "manifest.json"),
+      sha256: digest,
+      bytes: bytes.length,
+    },
+  });
+  await tree.write(
+    "manifest.json",
+    Readable.from([bytes]),
+    { sha256: digest, bytes: bytes.byteLength },
+    signal,
+  );
+  return result;
+};
 
 const publishPlannedScript = async (
   tree: SafeOutputTree,
@@ -197,6 +187,3 @@ const destinationCollisionReason = (cause: unknown): string | undefined =>
   cause.message.startsWith(DESTINATION_CASE_COLLISION_PREFIX)
     ? cause.message
     : undefined;
-
-const message = (cause: unknown): string =>
-  cause instanceof Error ? cause.message : "Unknown publication failure";

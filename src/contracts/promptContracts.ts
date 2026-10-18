@@ -399,4 +399,64 @@ export const PROMPT_CONTRACTS = [
       },
     ],
   },
+  {
+    name: "write_specification",
+    title: "Write a specification",
+    description:
+      "Investigate a target area by area, keep a findings ledger tied to Evidence IDs, and export an indexed Markdown specification tree that others can reuse without reading everything.",
+    objective:
+      "Produce a navigable specification whose fact pages are rendered from retained Evidence and whose findings are labelled observed, derived, inferred or unknown with the records they cite.",
+    arguments: {
+      output_directory: required(
+        "Absolute absent directory where the specification tree will be written",
+      ),
+      target_path: optional(
+        "Absolute target path; omit when the intended target is already open or analyzed",
+      ),
+      title: optional("Title for the specification's root README.md"),
+      evidence_bundle_path: optional(
+        "Absolute path of an already exported Evidence bundle; omit to export the current session first",
+      ),
+      focus: optional(
+        "Features, subsystems or questions the specification must cover first",
+      ),
+    },
+    steps: [
+      {
+        tools: [
+          "open_binary",
+          "binary_overview",
+          "analyze_javascript_application",
+          "inspect_artifact",
+        ],
+        instruction:
+          "Survey the target with the smallest useful overview or inventory, then list the areas (features, subsystems, resources) the specification must cover and the Evidence each needs.",
+      },
+      {
+        tools: [
+          "inspect_analysis_view",
+          "analyze_function",
+          "trace_application_feature",
+          "trace_feature",
+        ],
+        instruction:
+          "Investigate one area at a time from its entry point through data and state changes. Reuse retained Evidence through views instead of repeating producers.",
+      },
+      {
+        tools: ["record_unknown", "list_unknowns"],
+        instruction:
+          "Record each material question the Evidence leaves open as a residual unknown naming the authority still required; the specification lists them as unknowns, never as absence.",
+      },
+      {
+        tools: ["get_evidence_bundle", "export_evidence_bundle"],
+        instruction:
+          "Keep a findings ledger: one short statement per conclusion with its kind (observed, derived, inferred or unknown), area, and the Evidence IDs it cites. Export the session bundle to an absolute path when evidence_bundle_path is not supplied.",
+      },
+      {
+        tools: ["export_specification"],
+        instruction:
+          "Export into output_directory with the bundle and the findings ledger. A finding citing Evidence absent from the bundle or claiming more confidence than its citations is rejected; fix the ledger rather than weakening the Evidence. Read the resulting README.md to confirm the index answers the requested focus.",
+      },
+    ],
+  },
 ] as const satisfies readonly PromptContract[];

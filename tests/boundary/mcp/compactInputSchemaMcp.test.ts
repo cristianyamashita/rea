@@ -357,6 +357,15 @@ it("retains parameter types and avoids client-side reference expansion", async (
     reviewed_obligations: { type: "array" },
     manifest: { type: "object" },
   });
+  const specification = tools.find(
+    ({ name }) => name === "export_specification",
+  );
+  expect(specification?.inputSchema.properties).toMatchObject({
+    evidence_bundle: { type: "object" },
+    output_directory: { type: "string" },
+    findings: { type: "array" },
+    include_evidence_pages: { type: "boolean" },
+  });
   const coverage = tools.find(
     ({ name }) => name === "evaluate_reconstruction_coverage",
   );

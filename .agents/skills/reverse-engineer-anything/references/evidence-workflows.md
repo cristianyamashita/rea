@@ -69,3 +69,32 @@ When the connected schema advertises `include_query_parameter_names`, select
 it in the view for distinct observed names with original record ordinals. Query
 values are omitted; the names establish neither required parameters nor a
 complete server schema. Keep the original parent Evidence for exact URLs.
+
+## Specification export
+
+`export_specification` renders an Evidence bundle into an indexed Markdown tree:
+`README.md` → `areas/<operation>/index.md` (paged, at most 100 rows) →
+`areas/<operation>/items/<evidence_id>.md` → `evidence/<evidence_id>.json`, with
+`targets/`, `findings/`, `unknowns/` and `coverage.md` alongside. Fact pages are
+deterministic; identical input yields an identical `specification_digest`.
+
+Input: `evidence_bundle` (inline canonical bundle or `{ "path": "/abs/bundle.json" }`
+from `export_evidence_bundle`), an absent absolute `output_directory`, optional
+`title`, `findings` and `include_evidence_pages` (default true).
+
+Each finding is `{ id, title, statement, kind, area?, target_sha256?, evidence_ids, unknown_ids }`.
+`id` is 1–64 lowercase letters, digits and hyphens. `kind` `observed` needs a
+cited `observed` record, `derived` needs `observed|derived`, `inferred` needs any
+cited record, and `unknown` may cite only unknowns. Ids absent from the bundle,
+unknown areas or targets, duplicate or reserved ids, and kinds stronger than the
+citations are rejected with the `findings[i]...` path before any file is
+written. Records without an artifact subject are listed under
+`targets/unattributed.md`; absence of a page is not absence of behavior.
+
+CLI fallback:
+
+```bash
+rea export-specification '{"evidence_bundle":{"path":"/abs/bundle.json"},"output_directory":"/abs/specification","findings":[]}' --json
+```
+
+See the [specification export guide](https://github.com/morluto/rea/blob/main/docs/specification-export.md).

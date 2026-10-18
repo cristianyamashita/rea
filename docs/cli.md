@@ -226,6 +226,15 @@ rea compare /absolute/path/to/evidence/left.json /absolute/path/to/evidence/righ
 ```
 
 Exports preserve an existing destination unless `--overwrite` is explicit.
+
+To write a navigable Markdown specification of the analyzed target from a
+bundle, with optional analyst findings tied to Evidence IDs, use
+`rea export-specification`; see [specification export](specification-export.md):
+
+```bash
+rea export-specification '{"evidence_bundle":{"path":"/absolute/path/to/evidence/bundle.json"},"output_directory":"/absolute/path/to/specification"}' --json
+```
+
 For application traces and version comparisons, see
 [JavaScript application workflows](javascript-application-workflows.md).
 MCP [retained Evidence references](mcp-contracts.md#retained-application-evidence-inputs)

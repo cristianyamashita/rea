@@ -690,6 +690,7 @@ const MINIMUM_PROMPT_ARGUMENTS: Readonly<
     executable: "/usr/bin/true",
     working_directory: "/tmp",
   },
+  write_specification: { output_directory: "/tmp/specification" },
 };
 
 const lifecycleClient = (

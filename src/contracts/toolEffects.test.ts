@@ -78,6 +78,7 @@ const EXECUTION_WORDING_EXCEPTIONS: Readonly<Record<string, string>> = {
   trace_web_module_imports:
     "runs only REA's resolver stub in operator-configured Chromium",
   export_web_scripts: "states there is no refetch or execution",
+  export_specification: "states there is no target execution or network access",
   observe_web_execution:
     "instruments an externally driven page; it does not run code itself",
   recover_javascript_sources: "states there is no application code execution",
